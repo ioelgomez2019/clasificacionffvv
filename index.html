@@ -406,32 +406,38 @@
             </div>
 
 
-            <!-- INFORME (placeholder) -->
+            <!-- INFORME (animación "en construcción") -->
             <div class="tab-pane fade" id="tab-informe">
               <div class="card">
-                <div class="card-header">
-                  <h5 class="mb-0"><span class="material-icons-round align-middle me-1">assignment</span> Informe</h5>
+                <div class="card-header d-flex align-items-center justify-content-between">
+                  <h5 class="mb-0">
+                    <span class="material-icons-round align-middle me-1">assignment</span>
+                    Informe
+                  </h5>
+                  <small class="text-muted">Estado: en construcción</small>
                 </div>
-                <div class="card-body d-flex align-items-center justify-content-center" style="min-height: 40vh;">
-                  <div class="text-center">
-                    <!-- Caricatura/ilustración simple en SVG -->
-                    <svg width="160" height="120" viewBox="0 0 160 120" role="img" aria-label="En construcción" class="mb-2">
-                      <g fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="10" y="70" width="140" height="10" rx="2"></rect>
-                        <circle cx="40" cy="95" r="10"></circle>
-                        <circle cx="120" cy="95" r="10"></circle>
-                        <path d="M20 70 L80 30 L140 70 Z"></path>
-                        <path d="M75 25 l8 -5 m-8 5 l8 5" stroke-linecap="round"></path>
-                        <path d="M80 30 v40"></path>
-                      </g>
-                      <text x="80" y="64" text-anchor="middle" font-size="12" fill="currentColor">EN CONSTRUCCIÓN</text>
+
+                <div class="card-body">
+                  <div class="wip-wrap text-center">
+                    <svg class="wip-svg" viewBox="0 0 960 420" role="img" aria-label="En construcción por Julio Haylassi">
+                      <defs>
+                        <linearGradient id="grad" x1="0" x2="1" y1="0" y2="0">
+                          <stop offset="0" stop-color="#6366f1"/>
+                          <stop offset="1" stop-color="#22d3ee"/>
+                        </linearGradient>
+                      </defs>
+                      <!-- … (el mismo SVG con engranajes, barra y textos) … -->
                     </svg>
-                    <div class="lead fw-semibold">Informe en construcción</div>
-                    <div class="text-muted">Pronto verás aquí el reporte final y visualizaciones.</div>
+
+                    <div class="mt-3 wip-sub">
+                      <span class="wip-title d-block">JULIO HAYLASSI LO ESTÁ CONSTRUYENDO</span>
+                      <span>Pronto verás aquí el reporte final, gráficos y conclusiones.</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+
 
           </div><!-- tab-content -->
         </main>

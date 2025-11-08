@@ -117,3 +117,50 @@ html, body { color: var(--text); }
   border: 1px solid var(--border);
   flex: 0 0 auto;
 }
+
+/* === Tab Informe (animación en construcción) === */
+#tab-informe .wip-wrap{
+  border:1px dashed var(--border);
+  border-radius:1rem;
+  padding:clamp(12px,2vw,20px);
+  background: color-mix(in oklab, var(--panel) 92%, transparent);
+}
+#tab-informe .wip-title{
+  font-weight:800;
+  font-size:clamp(1.1rem, 2.4vw, 1.6rem);
+  letter-spacing:.02em;
+}
+#tab-informe .wip-sub{
+  color:var(--muted);
+  font-size:clamp(.9rem, 2vw, 1rem);
+}
+#tab-informe .wip-svg{
+  display:block; width:min(900px,100%); height:auto; margin:0 auto;
+}
+/* Texto con brillo pulsante */
+#tab-informe .glow{
+  filter: drop-shadow(0 0 6px rgba(99,102,241,.6));
+  animation: glow 2.5s ease-in-out infinite;
+}
+@keyframes glow{
+  0%,100% { opacity:1; }
+  50% { opacity:.75; }
+}
+/* Engranajes */
+#tab-informe .spin-slow { animation: spin 8s linear infinite; transform-origin: center; }
+#tab-informe .spin-fast { animation: spin 4s linear infinite reverse; transform-origin: center; }
+@keyframes spin { to { transform: rotate(360deg); } }
+/* Barras de progreso */
+#tab-informe .bar-track{ fill: none; stroke: var(--border); stroke-width: 10; }
+#tab-informe .bar-fill{
+  fill: none; stroke: url(#grad); stroke-width: 10; stroke-linecap: round;
+  stroke-dasharray: 560; stroke-dashoffset: 560; animation: load 6s ease-in-out infinite;
+}
+@keyframes load{
+  0%   { stroke-dashoffset: 560; }
+  50%  { stroke-dashoffset: 120; }
+  100% { stroke-dashoffset: 560; }
+}
+/* Cinta rayada */
+#tab-informe .stripe rect{ animation: slide 2.2s linear infinite; }
+@keyframes slide{ to { transform: translateX(-60px); } }

@@ -1,453 +1,882 @@
-<!DOCTYPE html>
-<html lang="es">
+<!doctype html>
+<html lang="es" data-theme="dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Clasificador por Centroide + Dashboard</title>
+  <title>Material Dashboard · Clasificador por Centroide</title>
+
+<!-- highlight.js -->
+<link id="hljs-theme" rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/common.min.js" defer></script>
+
+<!-- marked (Markdown) -->
+<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js" defer></script>
+
+<!-- MathJax (fórmulas) -->
+<script>
+  window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, svg: { fontCache: 'global' } };
+</script>
+<script id="mathjax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+
+
+
+
+
+<!-- highlight.js (ok con defer) -->
+<link id="hljs-theme" rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/common.min.js" defer></script>
+
 
   <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 
-  <style>
-    :root {
-      --bg-soft: #0f172a; /* slate-900 */
-      --card-soft: #111827; /* gray-900 */
-      --muted: #94a3b8; /* slate-400 */
-    }
-    body {
-      background: radial-gradient(1200px 800px at 10% -10%, rgba(59,130,246,.15), transparent 60%),
-                  radial-gradient(1200px 800px at 110% 10%, rgba(236,72,153,.15), transparent 60%),
-                  var(--bg-soft);
-      min-height: 100vh;
-      color: #e5e7eb;
-    }
-    .glass {
-      background: rgba(17,24,39,0.72);
-      border: 1px solid rgba(255,255,255,0.06);
-      box-shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
-      backdrop-filter: blur(8px);
-      border-radius: 1rem;
-    }
-    .brand-badge {
-      border: 1px solid rgba(255,255,255,.15);
-      color: #a5b4fc; /* indigo-300 */
-    }
-    .text-muted { color: var(--muted) !important; }
-    .form-floating>.form-control, .form-floating>.form-select { background-color: #0b1220; color: #e5e7eb; }
-    .form-control::placeholder { color: #64748b; }
-    .form-text { color: #94a3b8; }
-    .btn-primary { background-image: linear-gradient(90deg, #6366f1, #22d3ee); border: none; }
-    .btn-outline-light { border-color: rgba(255,255,255,.25) }
-    .table-dark tbody tr td { color: #e5e7eb; }
-    .kbd {
-      border: 1px solid rgba(255,255,255,.2); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      padding: .15rem .4rem; border-radius: .4rem; background: rgba(255,255,255,.05);
-    }
-    .spinner { width: 1.25rem; height: 1.25rem; border: 3px solid rgba(255,255,255,.25); border-top-color: #22d3ee; border-radius: 50%; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-  </style>
+  <!-- Styles -->
+  <link href="css/style.css" rel="stylesheet">
 </head>
-<body>
-  <nav class="navbar navbar-expand-lg bg-transparent py-3">
-    <div class="container">
-      <span class="navbar-brand mb-0 h1 d-flex align-items-center gap-2 text-light">
-        <span class="badge rounded-pill brand-badge">ML</span>
-        Clasificador por Centroide
-      </span>
-      <div class="d-flex align-items-center gap-2">
-        <button id="btn-limpiar" class="btn btn-outline-light btn-sm" title="Limpiar formulario (Esc)"><span class="kbd">Esc</span> Limpiar</button>
-        <label class="btn btn-outline-light btn-sm position-relative" title="Cargar JSON de reglas (alternativa al fetch)">
-          Cargar JSON
-          <input id="file-json" type="file" accept="application/json" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" />
-        </label>
-      </div>
-    </div>
-  </nav>
+<body class="bg-app">
 
-  <main class="container pb-5">
-    <!-- HEADER -->
-    <div class="glass p-4 p-md-5 mb-4">
-      <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-        <div>
-          <h1 class="display-6 mb-1">Asistente de Clasificación por <span class="text-info">Centroide Más Cercano</span></h1>
-          <p class="mb-0 text-muted">Transforma entradas (numéricas, ordinales y nominales) y asigna el cluster por distancia euclidiana.</p>
+  <!-- ========== LOGIN (sin BD) ========== -->
+  <section id="screen-login" class="vh-100 d-flex align-items-center justify-content-center">
+    <div class="card shadow-lg card-login">
+      <div class="card-body p-4 p-md-5">
+        <div class="text-center mb-3">
+          <span class="badge rounded-pill brand-badge">MD</span>
+          <h1 class="h4 mt-2 mb-0">Material Dashboard</h1>
+          <p class="text-muted mb-0">Inicia sesión para continuar</p>
         </div>
-        <div class="text-end">
-          <div id="version" class="badge text-bg-dark border border-light-subtle">v–</div>
-          <div class="small text-muted">Fuente: <code>data/reglas_asociacion.json</code></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- DASHBOARD -->
-    <section class="row g-3 mb-4">
-      <div class="col-12 col-md-3">
-        <div class="glass p-3 h-100">
-          <div class="text-muted small">Total de Features</div>
-          <div id="dash-features" class="display-6">–</div>
-        </div>
-      </div>
-      <div class="col-12 col-md-3">
-        <div class="glass p-3 h-100">
-          <div class="text-muted small">Dimensión del Espacio</div>
-          <div id="dash-dim" class="display-6">–</div>
-        </div>
-      </div>
-      <div class="col-12 col-md-3">
-        <div class="glass p-3 h-100">
-          <div class="text-muted small">Centroides</div>
-          <div id="dash-centroids" class="display-6">–</div>
-        </div>
-      </div>
-      <div class="col-12 col-md-3">
-        <div class="glass p-3 h-100">
-          <div class="text-muted small">Último Cluster</div>
-          <div id="dash-last" class="display-6">–</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- FORM + RESULTADOS -->
-    <section class="row g-4">
-      <div class="col-12 col-lg-6">
-        <div class="glass p-4 h-100">
-          <form id="form-clasificador" novalidate>
-            <div id="dynamic-fields" class="row g-3"></div>
-
-            <hr class="border-secondary-subtle my-4" />
-            <div class="d-flex gap-2 align-items-center">
-              <button type="submit" class="btn btn-primary px-4" id="btn-clasificar">
-                <span class="me-2 d-inline-flex align-items-center justify-content-center"><span class="spinner d-none" id="spin-submit"></span></span>
-                Clasificar
-              </button>
-              <button type="button" class="btn btn-outline-light" id="btn-demo">Usar demo</button>
-              <span class="text-muted small">Validación HTML5 activa</span>
+        <form id="form-login" novalidate>
+          <div class="mb-3">
+            <label class="form-label">Usuario</label>
+            <div class="input-group">
+              <span class="input-group-text"><span class="material-icons-round">person</span></span>
+              <input id="login-user" type="text" class="form-control" placeholder="admin" required>
             </div>
-          </form>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Contraseña</label>
+            <div class="input-group">
+              <span class="input-group-text"><span class="material-icons-round">lock</span></span>
+              <input id="login-pass" type="password" class="form-control" placeholder="admin" required>
+            </div>
+          </div>
+          <button class="btn btn-primary w-100 mb-2" type="submit">
+            <span class="material-icons-round align-middle me-1">login</span> Entrar
+          </button>
+          <div class="form-text text-center">Hint: usuario <code>admin</code> / contraseña <code>admin</code></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== APP (DASHBOARD + CLASIFICADOR + PROBLEMATICA + INFORME) ========== -->
+  <section id="screen-app" class="d-none">
+    <!-- Topbar -->
+    <nav class="navbar navbar-expand bg-topbar sticky-top shadow-sm">
+      <div class="container-fluid">
+        <button id="btn-toggle-sidebar" class="btn btn-link text-reset d-lg-none" aria-label="Abrir menú">
+          <span class="material-icons-round">menu</span>
+        </button>
+        <span class="navbar-brand fw-semibold d-none d-sm-inline">CASO DE ESTUDIO NRO 17</span>
+
+        <div class="ms-auto d-flex align-items-center gap-3">
+          <!-- Theme toggle -->
+          <div class="form-check form-switch theme-switch m-0" title="Cambiar tema">
+            <input class="form-check-input" type="checkbox" id="toggle-theme">
+            <label class="form-check-label small" for="toggle-theme">
+              <span class="material-icons-round align-middle me-1 theme-icon-sun">light_mode</span>
+              <span class="material-icons-round align-middle me-1 theme-icon-moon d-none">dark_mode</span>
+              Tema
+            </label>
+          </div>
+
+          <span id="chip-version" class="badge text-bg-dark">v–</span>
+          <button id="btn-logout" class="btn btn-outline-light btn-sm">
+            <span class="material-icons-round align-middle me-1">logout</span> Salir
+          </button>
         </div>
       </div>
+    </nav>
 
-      <div class="col-12 col-lg-6">
-        <div class="glass p-4 h-100">
-          <div id="resultado"><p class="text-muted mb-0">Aún no hay resultado. Completa el formulario y presiona <strong>Clasificar</strong>.</p></div>
-          <div id="explicacion" class="mt-3 text-muted small"></div>
-          <hr class="border-secondary-subtle" />
-          <div class="mb-2 d-flex align-items-center justify-content-between">
-            <h6 class="mb-0">Ranking de distancias</h6>
-            <span class="text-muted small">(euclidiana)</span>
+    <!-- Layout -->
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="col-12 col-lg-3 col-xxl-2 sidebar p-3 p-lg-4">
+          <div class="mb-3 text-uppercase small text-muted">Navegación</div>
+          <ul class="nav flex-column gap-1">
+            <li class="nav-item">
+              <a class="nav-link active" href="#tab-dashboard" data-bs-toggle="tab">
+                <span class="material-icons-round me-2">dashboard</span> Dashboard
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#tab-integrantes" data-bs-toggle="tab">
+                <span class="material-icons-round me-2">groups</span> Integrantes
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#tab-clasificador" data-bs-toggle="tab">
+                <span class="material-icons-round me-2">category</span> Clasificador
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#tab-problematica" data-bs-toggle="tab">
+                <span class="material-icons-round me-2">description</span> Problemática
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#tab-ipynb" data-bs-toggle="tab">
+                <span class="material-icons-round me-2">article</span> clasificacion.ipynb
+              </a>
+            </li>
+
+
+
+            <li class="nav-item">
+              <a class="nav-link" href="#tab-informe" data-bs-toggle="tab">
+                <span class="material-icons-round me-2">assignment</span> Informe
+              </a>
+            </li>
+          </ul>
+
+          <hr class="my-4 border-light-subtle">
+          <div class="d-grid gap-2">
+            <label class="btn btn-outline-light position-relative">
+              <span class="material-icons-round align-middle me-1">upload_file</span> Cargar JSON
+              <input id="file-json" type="file" accept="application/json"
+                     class="position-absolute top-0 start-0 w-100 h-100 opacity-0" />
+            </label>
           </div>
-          <div class="table-responsive">
-            <table class="table table-dark table-striped table-hover align-middle mb-3">
-              <thead><tr><th>Cluster</th><th>Distancia</th></tr></thead>
-              <tbody id="tabla-ranking"><tr><td colspan="2" class="text-muted">—</td></tr></tbody>
-            </table>
+          <div class="small text-muted mt-2">
+            Fuente por defecto: <code>data/reglas_asociacion.json</code>
           </div>
-          <canvas id="chart-dists" height="120"></canvas>
-        </div>
+        </aside>
+
+        <!-- Main content -->
+        <main class="col-12 col-lg-9 col-xxl-10 p-3 p-lg-4">
+          <div class="tab-content">
+
+            <!-- DASHBOARD -->
+            <div class="tab-pane fade show active" id="tab-dashboard">
+              <div class="row g-3 g-lg-4">
+                <div class="col-6 col-md-3">
+                  <div class="card card-kpi">
+                    <div class="card-body">
+                      <div class="kpi-label">Total de Features</div>
+                      <div id="dash-features" class="kpi-value">–</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6 col-md-3">
+                  <div class="card card-kpi">
+                    <div class="card-body">
+                      <div class="kpi-label">Dimensión</div>
+                      <div id="dash-dim" class="kpi-value">–</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6 col-md-3">
+                  <div class="card card-kpi">
+                    <div class="card-body">
+                      <div class="kpi-label">Centroides</div>
+                      <div id="dash-centroids" class="kpi-value">–</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6 col-md-3">
+                  <div class="card card-kpi">
+                    <div class="card-body">
+                      <div class="kpi-label">Último Cluster</div>
+                      <div id="dash-last" class="kpi-value">–</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card mt-3 mt-lg-4">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                  <h5 class="mb-0">Ranking de distancias</h5>
+                  <span class="text-muted small">(euclidiana)</span>
+                </div>
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                      <thead><tr><th>Cluster</th><th>Distancia</th></tr></thead>
+                      <tbody id="tabla-ranking"><tr><td colspan="2" class="text-muted">—</td></tr></tbody>
+                    </table>
+                  </div>
+                  <canvas id="chart-dists" height="120"></canvas>
+                </div>
+              </div>
+            </div>
+
+           <!-- INTEGRANTES (desde JSON) -->
+            <div class="tab-pane fade" id="tab-integrantes">
+              <div class="card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                  <h5 class="mb-0">
+                    <span class="material-icons-round align-middle me-1">groups</span>
+                    Integrantes del Proyecto
+                  </h5>
+                  <div class="d-flex gap-2">
+                    <label class="btn btn-outline-light btn-sm position-relative" title="Cargar integrantes.json local">
+                      <span class="material-icons-round align-middle me-1">upload_file</span> Cargar JSON
+                      <input id="file-integrantes" type="file" accept="application/json"
+                            class="position-absolute top-0 start-0 w-100 h-100 opacity-0" />
+                    </label>
+                    <a class="btn btn-outline-light btn-sm" href="data/integrantes.json" download>
+                      <span class="material-icons-round align-middle me-1">download</span> Descargar plantilla
+                    </a>
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <div class="row g-3 g-lg-4 align-items-end">
+                    <div class="col-12 col-md-6">
+                      <label class="form-label small text-muted mb-1">Buscar</label>
+                      <input id="integrantes-search" type="search" class="form-control" placeholder="Nombre, rol o tag…">
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <label class="form-label small text-muted mb-1">Ordenar por</label>
+                      <select id="integrantes-sort" class="form-select">
+                        <option value="nombre">Nombre</option>
+                        <option value="rol">Rol</option>
+                      </select>
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <label class="form-label d-block small text-muted mb-1">&nbsp;</label>
+                      <button id="integrantes-refresh" class="btn btn-outline-secondary w-100">Recargar</button>
+                    </div>
+                  </div>
+
+                  <hr class="my-4">
+
+                  <div id="integrantes-status" class="text-muted small mb-3">
+                    Intentando cargar <code>data/integrantes.json</code>…
+                  </div>
+
+                  <!-- contenedor dinámico -->
+                  <div id="integrantes-grid" class="row g-3 g-lg-4"><!-- tarjetas aquí --></div>
+                </div>
+              </div>
+            </div>
+
+
+
+            <!-- CLASIFICADOR -->
+            <div class="tab-pane fade" id="tab-clasificador">
+              <div class="row g-3 g-lg-4">
+                <div class="col-12 col-xl-7">
+                  <div class="card">
+                    <div class="card-header">
+                      <h5 class="mb-0"><span class="material-icons-round align-middle me-1">category</span> Ingresar parámetros</h5>
+                    </div>
+                    <div class="card-body">
+                      <form id="form-clasificador" novalidate>
+                        <div id="dynamic-fields" class="row g-3"></div>
+                        <hr class="my-4">
+                        <div class="d-flex gap-2 align-items-center">
+                          <button type="submit" class="btn btn-primary" id="btn-clasificar">
+                            <span id="spin-submit" class="spinner-border spinner-border-sm me-2 d-none"></span>
+                            Clasificar
+                          </button>
+                          <button type="button" id="btn-demo" class="btn btn-outline-secondary">Usar demo</button>
+                          <button type="button" id="btn-limpiar" class="btn btn-outline-secondary">Limpiar</button>
+                          <span class="text-muted small ms-auto">Validación HTML5 activa</span>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-xl-5">
+                  <div class="card sticky-top" style="top:1rem">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                      <h5 class="mb-0">Resultado</h5>
+                      <span id="version" class="badge text-bg-light"></span>
+                    </div>
+                    <div class="card-body">
+                      <div id="resultado">
+                        <p class="text-muted mb-0">Aún no hay resultado. Completa el formulario y presiona <strong>Clasificar</strong>.</p>
+                      </div>
+                      <hr>
+                      <div id="explicacion" class="small text-muted"></div>
+                    </div>
+                  </div>
+                </div>
+              </div><!-- row -->
+            </div>
+
+            <!-- PROBLEMÁTICA (HTML + PDF con tabs) -->
+            <div class="tab-pane fade" id="tab-problematica">
+              <div class="card">
+                <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+                  <h5 class="mb-0">
+                    <span class="material-icons-round align-middle me-1">description</span>
+                    Caso Estudio N°17 – Problemática
+                  </h5>
+                  <div class="d-flex align-items-center gap-2">
+                    <a class="btn btn-outline-light btn-sm" href="modulos/problematica17.html" target="_blank" rel="noopener">
+                      <span class="material-icons-round align-middle me-1">open_in_new</span> Abrir HTML
+                    </a>
+                    <a class="btn btn-outline-light btn-sm" href="data/CasoEstudio_N°17.pdf" target="_blank" rel="noopener">
+                      <span class="material-icons-round align-middle me-1">open_in_new</span> Abrir PDF
+                    </a>
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <!-- Sub-tabs para alternar entre HTML y PDF embebidos -->
+                  <ul class="nav nav-pills mb-3" id="problem-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link active" id="tab-html-btn" data-bs-toggle="tab" data-bs-target="#pane-html" type="button" role="tab">
+                        Versión HTML
+                      </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link" id="tab-pdf-btn" data-bs-toggle="tab" data-bs-target="#pane-pdf" type="button" role="tab">
+                        PDF original
+                      </button>
+                    </li>
+                  </ul>
+
+                  <div class="tab-content">
+                    <!-- Pane HTML -->
+                    <div class="tab-pane fade show active" id="pane-html" role="tabpanel" aria-labelledby="tab-html-btn">
+                      <div class="ratio ratio-16x9">
+                        <iframe src="modulos/problematica17.html" title="Problemática (HTML)"></iframe>
+                      </div>
+                      <p class="small text-muted mt-2">
+                        Mostrando la versión HTML estilizada. Si no se visualiza, usa <em>Abrir HTML</em>.
+                      </p>
+                    </div>
+
+                    <!-- Pane PDF -->
+                    <div class="tab-pane fade" id="pane-pdf" role="tabpanel" aria-labelledby="tab-pdf-btn">
+                      <div class="ratio ratio-16x9">
+                        <iframe src="data/CasoEstudio_N°17.pdf#view=FitH" title="Caso Estudio N°17 (PDF)"></iframe>
+                      </div>
+                      <p class="small text-muted mt-2">
+                        Documento PDF embebido desde <code>data/CasoEstudio_N°17.pdf</code>. Si no se visualiza, usa <em>Abrir PDF</em>.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <!-- CLASIFICACION.IPYNB (render notebook) -->
+            <div class="tab-pane fade" id="tab-ipynb">
+              <div class="card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                  <h5 class="mb-0">
+                    <span class="material-icons-round align-middle me-1">article</span>
+                    Notebook: CasoIIntegrador17.ipynb
+                  </h5>
+                  <div class="d-flex gap-2">
+                    <label class="btn btn-outline-light btn-sm position-relative" title="Cargar .ipynb local">
+                      <span class="material-icons-round align-middle me-1">upload_file</span> Cargar .ipynb
+                      <input id="file-ipynb" type="file" accept=".ipynb,application/json"
+                            class="position-absolute top-0 start-0 w-100 h-100 opacity-0" />
+                    </label>
+                    <a class="btn btn-outline-light btn-sm" href="data/CasoIIntegrador17.ipynb" download>
+                      <span class="material-icons-round align-middle me-1">download</span> Descargar
+                    </a>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div id="ipynb-status" class="text-muted small mb-3">
+                    Intentando cargar <code>data/CasoIIntegrador17.ipynb</code>…
+                  </div>
+                  <div id="ipynb-container" class="ipynb-container">
+                    <!-- Aquí se renderiza el notebook -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <!-- INFORME (placeholder) -->
+            <div class="tab-pane fade" id="tab-informe">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="mb-0"><span class="material-icons-round align-middle me-1">assignment</span> Informe</h5>
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center" style="min-height: 40vh;">
+                  <div class="text-center">
+                    <!-- Caricatura/ilustración simple en SVG -->
+                    <svg width="160" height="120" viewBox="0 0 160 120" role="img" aria-label="En construcción" class="mb-2">
+                      <g fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="10" y="70" width="140" height="10" rx="2"></rect>
+                        <circle cx="40" cy="95" r="10"></circle>
+                        <circle cx="120" cy="95" r="10"></circle>
+                        <path d="M20 70 L80 30 L140 70 Z"></path>
+                        <path d="M75 25 l8 -5 m-8 5 l8 5" stroke-linecap="round"></path>
+                        <path d="M80 30 v40"></path>
+                      </g>
+                      <text x="80" y="64" text-anchor="middle" font-size="12" fill="currentColor">EN CONSTRUCCIÓN</text>
+                    </svg>
+                    <div class="lead fw-semibold">Informe en construcción</div>
+                    <div class="text-muted">Pronto verás aquí el reporte final y visualizaciones.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- tab-content -->
+        </main>
       </div>
-    </section>
-  </main>
+    </div>
+  </section>
 
+  <!-- Scripts -->
+  <script type="module" src="js/clasificador.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Auth + layout + theme -->
   <script>
-  // =================== CONFIG ===================
-  const RULES_URL = "data/reglas_asociacion.json"; // ruta por defecto
+    const $login = document.getElementById('screen-login');
+    const $app   = document.getElementById('screen-app');
+    const $formLogin = document.getElementById('form-login');
+    const $user = document.getElementById('login-user');
+    const $pass = document.getElementById('login-pass');
+    const $logout = document.getElementById('btn-logout');
+    const $sidebarBtn = document.getElementById('btn-toggle-sidebar');
+    const $sidebar = document.getElementById('sidebar');
+    const $toggleTheme = document.getElementById('toggle-theme');
+    const $html = document.documentElement;
+    const THEME_KEY = 'md:theme';
 
-  // =================== ESTADO ===================
-  let RULES = null;          // reglas cargadas
-  let EXPANSION_SPEC = null; // especificación de expansión
-  let chart = null;          // instancia Chart.js
+    function showApp() { $login.classList.add('d-none'); $app.classList.remove('d-none'); }
+    function showLogin() { $app.classList.add('d-none'); $login.classList.remove('d-none'); }
 
-  // =================== DOM ===================
-  const $fields = document.getElementById("dynamic-fields");
-  const $form   = document.getElementById("form-clasificador");
-  const $res    = document.getElementById("resultado");
-  const $exp    = document.getElementById("explicacion");
-  const $ver    = document.getElementById("version");
-  const $btnLimpiar = document.getElementById("btn-limpiar");
-  const $fileJson = document.getElementById("file-json");
-  const $btnDemo = document.getElementById("btn-demo");
-  const $spinSubmit = document.getElementById("spin-submit");
-  const $dash = {
-    features: document.getElementById("dash-features"),
-    dim: document.getElementById("dash-dim"),
-    centroids: document.getElementById("dash-centroids"),
-    last: document.getElementById("dash-last")
-  };
+    // restore session
+    if (localStorage.getItem('authUser') === 'admin') showApp();
 
-  // =================== UTILIDADES ===================
-  const el = (tag, attrs = {}, inner = "") => {
-    const n = document.createElement(tag);
-    Object.entries(attrs).forEach(([k, v]) => {
-      if (k === "class") n.className = v;
-      else if (k === "for") n.htmlFor = v;
-      else if (v === true) n.setAttribute(k, "");
-      else if (v === false || v == null) {/*ignore*/}
-      else n.setAttribute(k, v);
+    $formLogin?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (($user.value || '').toLowerCase() === 'admin' && ($pass.value || '').toLowerCase() === 'admin') {
+        localStorage.setItem('authUser', 'admin');
+        showApp();
+      } else {
+        alert('Credenciales inválidas (usa admin/admin)');
+      }
     });
-    if (inner) n.innerHTML = inner;
-    return n;
-  };
 
-  const euclidean = (a, b) => {
-    let sum = 0;
-    for (let i = 0; i < a.length; i++) {
-      const d = (a[i] ?? 0) - (b[i] ?? 0);
-      sum += d * d;
+    $logout?.addEventListener('click', () => {
+      localStorage.removeItem('authUser');
+      showLogin();
+    });
+
+    $sidebarBtn?.addEventListener('click', () => {
+      $sidebar.classList.toggle('open');
+    });
+
+    // ======= Theme toggle =======
+    function setTheme(theme){ $html.setAttribute('data-theme', theme); localStorage.setItem(THEME_KEY, theme); $toggleTheme.checked = (theme === 'dark'); updateThemeIcons(); }
+    function updateThemeIcons(){
+      const sun = document.querySelector('.theme-icon-sun');
+      const moon = document.querySelector('.theme-icon-moon');
+      if ($html.getAttribute('data-theme') === 'dark'){ sun?.classList.add('d-none'); moon?.classList.remove('d-none'); }
+      else { moon?.classList.add('d-none'); sun?.classList.remove('d-none'); }
     }
-    return Math.sqrt(sum);
-  };
-
-  const withSpinner = async (fn) => {
-    $spinSubmit.classList.remove("d-none");
-    try { return await fn(); } finally { $spinSubmit.classList.add("d-none"); }
-  };
-
-  // =================== RENDER ===================
-  function renderFields(features) {
-    $fields.innerHTML = "";
-    features.forEach((f, idx) => {
-      const col = el("div", { class: "col-md-6" });
-      const id = `fld_${idx}`;
-      const group = el("div", { class: "form-floating" });
-
-      if (f.type === "num") {
-        const input = el("input", {
-          type: "number", id, name: f.name, class: "form-control",
-          min: f.min, max: f.max, step: "any", required: true, placeholder: f.label
-        });
-        if (typeof f.default === 'number') input.value = f.default;
-        const label = el("label", { for: id }, f.label);
-        group.appendChild(input); group.appendChild(label);
-        const help = el("div", { class: "form-text" }, `Límites: ${f.min} – ${f.max}`);
-        col.appendChild(group); col.appendChild(help);
+    $toggleTheme?.addEventListener('change', () => setTheme($toggleTheme.checked ? 'dark' : 'light'));
+    // Restore saved theme or prefers-color-scheme
+    (function(){
+      const saved = localStorage.getItem(THEME_KEY);
+      if (saved) setTheme(saved);
+      else {
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        setTheme(prefersDark ? 'dark' : 'light');
       }
+    })();
+  </script>
 
-      if (f.type === "ord" || f.type === "nom") {
-        const opts = f.type === "ord" ? f.order : f.values;
-        const select = el("select", { id, name: f.name, class: "form-select", required: true });
-        select.appendChild(el("option", { value: "" }, "Selecciona..."));
-        opts.forEach(v => { const o = el("option", { value: v }, v); if (f.default === v) o.selected = true; select.appendChild(o); });
-        const label = el("label", { for: id }, f.label);
-        group.appendChild(select); group.appendChild(label);
-        const help = el("div", { class: "form-text" }, `Opciones: ${opts.join(" · ")}`);
-        col.appendChild(group); col.appendChild(help);
-      }
+<script>
+  // ====== DOM ======
+  const $nbContainer = document.getElementById("ipynb-container");
+  const $nbStatus = document.getElementById("ipynb-status");
+  const $nbFile = document.getElementById("file-ipynb");
+  const $hljsTheme = document.getElementById("hljs-theme");
+  const htmlEl = document.documentElement;
 
-      $fields.appendChild(col);
-    });
+  // ====== Ruta por defecto (acepta ?src=...) ======
+  function getDefaultSrc() {
+    const params = new URLSearchParams(location.search);
+    return params.get("src") || "data/CasoIIntegrador17.ipynb";
   }
+  let NB_PATH_DEFAULT = getDefaultSrc();
 
-  function buildExpansionSpec(features) {
-    const spec = []; let cursor = 0;
-    features.forEach(f => {
-      if (f.type === "num") {
-        spec.push({ name: f.name, type: "num", startIndex: cursor, length: 1, meta: { mean: f.mean, std: f.std } });
-        cursor += 1;
-      } else if (f.type === "ord") {
-        spec.push({ name: f.name, type: "ord", startIndex: cursor, length: 1, meta: { order: f.order } });
-        cursor += 1;
-      } else if (f.type === "nom") {
-        spec.push({ name: f.name, type: "nom", startIndex: cursor, length: f.values.length, meta: { values: f.values } });
-        cursor += f.values.length;
-      }
-    });
-    return { spec, vectorLength: cursor };
-  }
-
-  function encodeFormToVector(features, spec) {
-    const { vectorLength } = spec; const v = new Array(vectorLength).fill(0);
-    features.forEach(f => {
-      const s = spec.spec.find(x => x.name === f.name); if (!s) return;
-      const elInput = document.querySelector(`[name="${f.name}"]`);
-      const raw = elInput?.value;
-
-      if (f.type === "num") {
-        if (raw === "" || raw == null) throw new Error(`Campo requerido: ${f.label ?? f.name}`);
-        const x = Number(raw); const mu = Number(s.meta.mean ?? 0); const sd = Number(s.meta.std ?? 1);
-        v[s.startIndex] = sd ? (x - mu) / sd : x;
-      }
-      if (f.type === "ord") {
-        const order = s.meta.order || []; if (raw === "") throw new Error(`Selecciona un valor en ${f.label ?? f.name}`);
-        const idx = order.indexOf(raw); if (idx === -1) throw new Error(`Valor no permitido en ${f.label ?? f.name}`);
-        v[s.startIndex] = idx;
-      }
-      if (f.type === "nom") {
-        const values = s.meta.values || []; if (raw === "") throw new Error(`Selecciona un valor en ${f.label ?? f.name}`);
-        const pos = values.indexOf(raw); if (pos === -1) throw new Error(`Valor no permitido en ${f.label ?? f.name}`);
-        for (let i = 0; i < values.length; i++) v[s.startIndex + i] = (i === pos) ? 1 : 0;
-      }
-    });
-    return v;
-  }
-
-  function predictCluster(vec, centroids) {
-    const dists = centroids.map(c => ({ cluster: c.cluster, dist: euclidean(vec, c.vector) }));
-    dists.sort((a, b) => a.dist - b.dist);
-    return { best: dists[0], ranking: dists };
-  }
-
-  function renderResultado(pred, vec) {
-    const { best, ranking } = pred;
-
-    // Resumen
-    $res.innerHTML = `
-      <div class="display-6 mb-2">Cluster <span class="badge text-bg-info">${best.cluster}</span></div>
-      <div class="text-muted">Distancia al centroide: <strong>${best.dist.toFixed(4)}</strong></div>
-      <div class="mt-2 small text-muted">Vector (z/índice/one-hot): <code>${vec.map(x => Number(x).toFixed(3)).join(", ")}</code></div>
-    `;
-
-    // Explicación
-    $exp.innerHTML = `La asignación se realiza por <em>centroide más cercano</em> en el espacio transformado: <code>num → z-score</code>, <code>ordinal → índice</code>, <code>nominal → one-hot</code>. Verifica que <code>mean</code>/<code>std</code> y el orden de categorías del JSON coincidan con el entrenamiento.`;
-
-    // Tabla ranking
-    const $tbody = document.getElementById("tabla-ranking");
-    $tbody.innerHTML = ranking.map(r => `<tr><td>Cluster ${r.cluster}</td><td>${r.dist.toFixed(4)}</td></tr>`).join("");
-
-    // Dashboard last
-    $dash.last.textContent = `#${best.cluster}`;
-
-    // Chart
-    renderChart(ranking);
-  }
-
-  function renderChart(ranking) {
-    const ctx = document.getElementById('chart-dists').getContext('2d');
-    const labels = ranking.map(r => `C${r.cluster}`);
-    const data = ranking.map(r => r.dist);
-    if (chart) chart.destroy();
-    chart = new Chart(ctx, {
-      type: 'bar',
-      data: { labels, datasets: [{ label: 'Distancia al centroide', data }] },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { display: true },
-          tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw.toFixed(4)}` } }
-        },
-        scales: {
-          x: { grid: { color: 'rgba(255,255,255,.06)' } },
-          y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.06)' } }
-        }
-      }
-    });
-  }
-
-  function clearForm() {
-    $form.reset();
-    localStorage.removeItem('clasif:lastValues');
-    $res.innerHTML = `<p class="text-muted mb-0">Aún no hay resultado. Completa el formulario y presiona <strong>Clasificar</strong>.</p>`;
-    $exp.innerHTML = "";
-    document.getElementById("tabla-ranking").innerHTML = `<tr><td colspan="2" class="text-muted">—</td></tr>`;
-    if (chart) { chart.destroy(); chart = null; }
-    $dash.last.textContent = "–";
-  }
-
-  function updateDashboardMeta() {
-    if (!RULES || !EXPANSION_SPEC) return;
-    $ver.textContent = `v${RULES.version ?? "–"}`;
-    $dash.features.textContent = RULES.feature_space?.length ?? 0;
-    $dash.dim.textContent = EXPANSION_SPEC.vectorLength ?? 0;
-    $dash.centroids.textContent = RULES.centroids?.length ?? 0;
-  }
-
-  // =================== INIT ===================
-  async function loadRulesFromUrl(url) {
-    const resp = await fetch(url, { cache: 'no-store' });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  // ====== Utilidades ======
+  async function fetchJSON(url) {
+    const resp = await fetch(url, { cache: "no-store" });
+    if (!resp.ok) {
+      const text = await resp.text().catch(() => "");
+      throw new Error(`HTTP ${resp.status} ${resp.statusText}${text ? " · " + text.slice(0,120) : ""}`);
+    }
     return resp.json();
   }
-
-  async function init(rules) {
-    RULES = rules;
-    renderFields(RULES.feature_space);
-    EXPANSION_SPEC = buildExpansionSpec(RULES.feature_space);
-    updateDashboardMeta();
-
-    // Restaurar últimos valores (si existen)
-    try {
-      const last = JSON.parse(localStorage.getItem('clasif:lastValues') || 'null');
-      if (last) Object.entries(last).forEach(([name, val]) => { const el = document.querySelector(`[name="${name}"]`); if (el) el.value = val; });
-    } catch {}
+  function codeBlock(lang, src) {
+    const pre = document.createElement("pre");
+    const code = document.createElement("code");
+    if (lang) code.className = `language-${lang}`;
+    code.textContent = Array.isArray(src) ? src.join("") : String(src || "");
+    pre.appendChild(code);
+    if (window.hljs) window.hljs.highlightElement(code);
+    return pre;
+  }
+  function mdBlock(text) {
+    const div = document.createElement("div");
+    const md = Array.isArray(text) ? text.join("") : String(text || "");
+    div.className = "nb-md";
+    div.innerHTML = window.marked ? window.marked.parse(md) : md;
+    return div;
+  }
+  function textBlock(text) {
+    const pre = document.createElement("pre");
+    pre.textContent = Array.isArray(text) ? text.join("") : String(text || "");
+    return pre;
+  }
+  function htmlBlock(html) {
+    const div = document.createElement("div");
+    div.innerHTML = Array.isArray(html) ? html.join("") : String(html || "");
+    return div;
+  }
+  function imgBlock(mime, b64) {
+    const img = document.createElement("img");
+    img.src = `data:${mime};base64,${b64}`;
+    img.style.maxWidth = "100%";
+    img.style.height = "auto";
+    return img;
+  }
+  function renderOutputs(outputs, parent) {
+    if (!outputs || !outputs.length) return;
+    const out = document.createElement("div");
+    out.className = "nb-output";
+    outputs.forEach(o => {
+      // stream
+      if (o.output_type === "stream") {
+        out.appendChild(textBlock(o.text || o.name || ""));
+      }
+      // execute_result / display_data
+      if (o.output_type === "execute_result" || o.output_type === "display_data") {
+        const d = o.data || {};
+        if (d["text/html"]) out.appendChild(htmlBlock(d["text/html"]));
+        else if (d["image/png"]) out.appendChild(imgBlock("image/png", d["image/png"]));
+        else if (d["image/jpeg"]) out.appendChild(imgBlock("image/jpeg", d["image/jpeg"]));
+        else if (d["text/plain"]) out.appendChild(textBlock(d["text/plain"]));
+      }
+      // error
+      if (o.output_type === "error") {
+        const pre = document.createElement("pre");
+        pre.style.color = "var(--bs-danger, #ef4444)";
+        pre.textContent = (o.ename || "Error") + ": " + (o.evalue || "");
+        out.appendChild(pre);
+      }
+    });
+    parent.appendChild(out);
   }
 
-  // =================== EVENTOS ===================
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') clearForm(); });
+  async function renderIpynb(nbjson) {
+    const cells = nbjson?.cells || nbjson?.worksheets?.[0]?.cells || [];
+    $nbContainer.innerHTML = "";
 
-  $form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!$form.checkValidity()) { $form.classList.add('was-validated'); return; }
+    cells.forEach(cell => {
+      const card = document.createElement("div");
+      card.className = "nb-cell";
 
-    await withSpinner(async () => {
-      try {
-        const vec = encodeFormToVector(RULES.feature_space, EXPANSION_SPEC);
-        // validar dimensionalidad de centroides
-        RULES.centroids.forEach(c => {
-          if (c.vector.length !== EXPANSION_SPEC.vectorLength) {
-            throw new Error(`Dimensión del centroide ${c.cluster} (${c.vector.length}) no coincide con el espacio (${EXPANSION_SPEC.vectorLength}).`);
-          }
-        });
-        const pred = predictCluster(vec, RULES.centroids);
-        renderResultado(pred, vec);
-
-        // persistir valores del form
-        const values = {};
-        RULES.feature_space.forEach(f => { const el = document.querySelector(`[name="${f.name}"]`); values[f.name] = el?.value ?? null; });
-        localStorage.setItem('clasif:lastValues', JSON.stringify(values));
-      } catch (err) {
-        $res.innerHTML = `<div class="alert alert-danger">⚠️ ${err.message}</div>`;
-        $exp.innerHTML = "";
+      if (cell.cell_type === "markdown") {
+        card.appendChild(mdBlock(cell.source || cell.src || ""));
+      } else if (cell.cell_type === "code") {
+        const lang = (nbjson?.metadata?.language_info?.name) || "python";
+        card.appendChild(codeBlock(lang, cell.source));
+        renderOutputs(cell.outputs || [], card);
+      } else {
+        // raw u otros
+        card.appendChild(textBlock(cell.source || cell.text || ""));
       }
+
+      $nbContainer.appendChild(card);
     });
-  });
 
-  $btnLimpiar.addEventListener('click', clearForm);
+    // MathJax
+    if (window.MathJax?.typesetPromise) {
+      await window.MathJax.typesetPromise([$nbContainer]).catch(() => {});
+    }
+  }
 
-  $fileJson.addEventListener('change', async (e) => {
-    const file = e.target.files?.[0]; if (!file) return;
+  async function loadNotebook(path = NB_PATH_DEFAULT) {
     try {
+      if ($nbStatus) $nbStatus.textContent = `Cargando ${path}…`;
+      const nbjson = await fetchJSON(path);
+      await renderIpynb(nbjson);
+      if ($nbStatus) $nbStatus.textContent = "Notebook cargado correctamente.";
+    } catch (err) {
+      const isCors = String(err).includes("TypeError") && location.protocol === "file:";
+      const tip = isCors
+        ? `Estás abriendo con file:// y fetch está bloqueado. Usa “Cargar .ipynb” o sirve el sitio (p.ej. <code>python -m http.server</code>).`
+        : `Verifica ruta/nombre (mayúsc./minúsc.): <code>${path}</code>`;
+      if ($nbStatus) {
+        $nbStatus.innerHTML = `
+          <span class="text-warning">No se pudo cargar <code>${path}</code> → ${err.message}</span><br>
+          ${tip}
+          <div class="mt-2">
+            <button id="btn-ipynb-retry" class="btn btn-sm btn-outline-secondary">Recargar</button>
+          </div>
+        `;
+        document.getElementById("btn-ipynb-retry")?.addEventListener("click", () => loadNotebook(path));
+      }
+    }
+  }
+
+  // Cargar cuando se muestre la pestaña y si ya está activa
+  function wireTabLoader() {
+    const tabLink = document.querySelector('a[href="#tab-ipynb"]');
+    if (!tabLink) return;
+    tabLink.addEventListener("shown.bs.tab", () => {
+      if ($nbContainer && !$nbContainer.children.length) loadNotebook();
+    });
+    const activePane = document.querySelector("#tab-ipynb.tab-pane.active.show");
+    if (activePane && !$nbContainer.children.length) loadNotebook();
+  }
+  document.addEventListener("DOMContentLoaded", wireTabLoader);
+
+  // Carga mediante input file
+  $nbFile?.addEventListener("change", async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      if ($nbStatus) $nbStatus.textContent = "Leyendo archivo local…";
       const text = await file.text();
       const json = JSON.parse(text);
-      await init(json);
-      $ver.textContent = `${$ver.textContent} (local)`;
+      await renderIpynb(json);
+      if ($nbStatus) $nbStatus.textContent = `Notebook local cargado: ${file.name}`;
     } catch (err) {
-      alert('No se pudo leer el JSON: ' + err.message);
+      if ($nbStatus) $nbStatus.innerHTML = `<span class="text-danger">No se pudo leer el .ipynb: ${err.message}</span>`;
     }
   });
 
-  $btnDemo.addEventListener('click', () => {
-    if (!RULES) return;
-    // Autocompletar con valores válidos simples
-    RULES.feature_space.forEach(f => {
-      const el = document.querySelector(`[name="${f.name}"]`);
-      if (!el) return;
-      if (f.type === 'num') {
-        const mid = (Number(f.min ?? 0) + Number(f.max ?? 0)) / 2;
-        el.value = (f.default ?? mid).toString();
-      }
-      if (f.type === 'ord') el.value = f.default ?? f.order?.[0] ?? '';
-      if (f.type === 'nom') el.value = f.default ?? f.values?.[0] ?? '';
+  // Tema claro/oscuro para highlight
+  function applyHljsTheme() {
+    const dark = htmlEl.getAttribute("data-theme") === "dark";
+    if ($hljsTheme) {
+      $hljsTheme.href = dark
+        ? "https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css"
+        : "https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.min.css";
+    }
+  }
+  applyHljsTheme();
+  new MutationObserver(applyHljsTheme).observe(htmlEl, { attributes: true, attributeFilter: ["data-theme"] });
+</script>
+<script>
+  // ==== Integrantes (JSON) ====
+  const INTEGRANTES_PATH = "data/integrantes.json";
+  const $grid = document.getElementById("integrantes-grid");
+  const $status = document.getElementById("integrantes-status");
+  const $fileInput = document.getElementById("file-integrantes");
+  const $search = document.getElementById("integrantes-search");
+  const $sort = document.getElementById("integrantes-sort");
+  const $refresh = document.getElementById("integrantes-refresh");
+
+  let INTEGRANTES = [];   // cache
+  let FILTER = "";        // búsqueda
+  let SORT_BY = "nombre"; // orden inicial
+
+  function initialsFromName(name = "") {
+    return name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(s => s[0]?.toUpperCase() || "")
+      .join("") || "??";
+  }
+
+  function badge(label, colorCls) {
+    const span = document.createElement("span");
+    span.className = `badge rounded-pill ${colorCls || "bg-primary-subtle text-primary"} me-1 mb-1`;
+    span.textContent = label;
+    return span;
+  }
+
+  function renderCard(p) {
+    const col = document.createElement("div");
+    col.className = "col-12 col-sm-6 col-lg-4";
+
+    const card = document.createElement("div");
+    card.className = "card h-100";
+
+    const body = document.createElement("div");
+    body.className = "card-body d-flex gap-3";
+
+    const avatar = document.createElement("div");
+    avatar.className = "integrante-avatar";
+    avatar.textContent = initialsFromName(p.nombre);
+
+    const flex = document.createElement("div");
+    flex.className = "flex-grow-1";
+
+    const head = document.createElement("div");
+    head.className = "d-flex align-items-start justify-content-between";
+
+    const h6 = document.createElement("h6");
+    h6.className = "mb-1";
+    h6.textContent = p.nombre || "—";
+
+    const rol = document.createElement("span");
+    rol.className = "badge text-bg-light";
+    rol.textContent = p.rol || "Integrante";
+
+    head.appendChild(h6);
+    head.appendChild(rol);
+
+    const sub = document.createElement("div");
+    sub.className = "text-muted small";
+    sub.textContent = (p.descripcion || p.especialidad || p.rol || "").toString();
+
+    const contact = document.createElement("div");
+    contact.className = "small mt-2";
+
+    if (p.email) {
+      const line = document.createElement("div");
+      line.innerHTML = `<span class="material-icons-round align-middle me-1" style="font-size:1rem;">mail</span>
+                        <a href="mailto:${p.email}">${p.email}</a>`;
+      contact.appendChild(line);
+    }
+    if (p.telefono) {
+      const line = document.createElement("div");
+      line.innerHTML = `<span class="material-icons-round align-middle me-1" style="font-size:1rem;">call</span>
+                        ${p.telefono}`;
+      contact.appendChild(line);
+    }
+    if (Array.isArray(p.links)) {
+      p.links.forEach(l => {
+        if (!l?.url) return;
+        const line = document.createElement("div");
+        line.innerHTML = `<span class="material-icons-round align-middle me-1" style="font-size:1rem;">link</span>
+                          <a href="${l.url}" target="_blank" rel="noopener">${l.label || l.url}</a>`;
+        contact.appendChild(line);
+      });
+    }
+
+    flex.appendChild(head);
+    if (sub.textContent) flex.appendChild(sub);
+    flex.appendChild(contact);
+
+    body.appendChild(avatar);
+    body.appendChild(flex);
+
+    const footer = document.createElement("div");
+    footer.className = "card-footer d-flex flex-wrap gap-2";
+    if (Array.isArray(p.tags)) {
+      p.tags.forEach(t => footer.appendChild(badge(t)));
+    }
+
+    card.appendChild(body);
+    card.appendChild(footer);
+    col.appendChild(card);
+    return col;
+  }
+
+  function applyFilterAndSort(data) {
+    const q = FILTER.trim().toLowerCase();
+    let arr = data.slice();
+    if (q) {
+      arr = arr.filter(p => {
+        const haystack = [
+          p.nombre, p.rol, p.descripcion, p.especialidad,
+          ...(p.tags || [])
+        ].filter(Boolean).join(" ").toLowerCase();
+        return haystack.includes(q);
+      });
+    }
+    arr.sort((a, b) => {
+      const ka = (a[SORT_BY] || "").toString().toLowerCase();
+      const kb = (b[SORT_BY] || "").toString().toLowerCase();
+      return ka.localeCompare(kb, "es");
     });
+    return arr;
+  }
+
+  function renderIntegrantes() {
+    if (!$grid) return;
+    $grid.innerHTML = "";
+    const data = applyFilterAndSort(INTEGRANTES);
+    if (!data.length) {
+      $grid.innerHTML = `<div class="col-12 text-muted">No hay integrantes que coincidan con el filtro.</div>`;
+      return;
+    }
+    data.forEach(p => $grid.appendChild(renderCard(p)));
+  }
+
+  async function loadIntegrantes(path = INTEGRANTES_PATH) {
+    try {
+      if ($status) $status.textContent = `Cargando ${path}…`;
+      const json = await fetch(path, { cache: "no-store" }).then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status} ${r.statusText}`);
+        return r.json();
+      });
+      INTEGRANTES = Array.isArray(json) ? json : (json.equipo || []);
+      renderIntegrantes();
+      if ($status) $status.textContent = "Integrantes cargados.";
+    } catch (err) {
+      const isCors = String(err).includes("TypeError") && location.protocol === "file:";
+      const tip = isCors
+        ? `Parece que abriste con file:// y fetch está bloqueado. Usa “Cargar JSON” o sirve el sitio (p.ej. <code>python -m http.server</code>).`
+        : `Verifica ruta/nombre: <code>${path}</code>`;
+      if ($status) {
+        $status.innerHTML = `
+          <span class="text-warning">No se pudo cargar <code>${path}</code> → ${err.message}</span><br>
+          ${tip}
+        `;
+      }
+      INTEGRANTES = [];
+      renderIntegrantes();
+    }
+  }
+
+  // Eventos UI
+  $fileInput?.addEventListener("change", async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      if ($status) $status.textContent = "Leyendo archivo local…";
+      const text = await file.text();
+      const json = JSON.parse(text);
+      INTEGRANTES = Array.isArray(json) ? json : (json.equipo || []);
+      renderIntegrantes();
+      if ($status) $status.textContent = `Integrantes cargados desde: ${file.name}`;
+    } catch (err) {
+      if ($status) $status.innerHTML = `<span class="text-danger">No se pudo leer el JSON: ${err.message}</span>`;
+    }
   });
 
-  // Cargar reglas por defecto al iniciar
-  (async () => {
-    try {
-      const rules = await loadRulesFromUrl(RULES_URL);
-      await init(rules);
-    } catch (err) {
-      $res.innerHTML = `<div class="alert alert-warning d-flex align-items-center gap-2">
-        <div class="spinner"></div>
-        <div>
-          No se pudieron cargar las reglas (<code>${RULES_URL}</code>): ${err.message}.<br/>
-          Si estás abriendo este archivo con <em>file://</em>, algunos navegadores bloquean <code>fetch</code>. Usa un servidor local o <strong>sube el JSON con el botón "Cargar JSON"</strong>.
-        </div>
-      </div>`;
-    }
-  })();
-  </script>
+  $search?.addEventListener("input", () => { FILTER = $search.value || ""; renderIntegrantes(); });
+  $sort?.addEventListener("change", () => { SORT_BY = $sort.value || "nombre"; renderIntegrantes(); });
+  $refresh?.addEventListener("click", () => loadIntegrantes());
+
+  // Cargar al mostrar la pestaña y también si ya está activa
+  function wireTabIntegrantesLoader() {
+    const tabLink = document.querySelector('a[href="#tab-integrantes"]');
+    if (!tabLink) return;
+    tabLink.addEventListener("shown.bs.tab", () => {
+      if (!INTEGRANTES.length) loadIntegrantes();
+    });
+    const activePane = document.querySelector("#tab-integrantes.tab-pane.active.show");
+    if (activePane && !INTEGRANTES.length) loadIntegrantes();
+  }
+  document.addEventListener("DOMContentLoaded", wireTabIntegrantesLoader);
+</script>
+
+
 </body>
 </html>

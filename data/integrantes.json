@@ -1,0 +1,46 @@
+{
+  "equipo": [
+    
+    {
+      "nombre": "Joel Santos Gómez Alanoca",
+      "rol": "Líder Técnico",
+      "descripcion": "Arquitectura del proyecto, estándares de código y seguridad. Code reviews y despliegues.",
+      "tags": ["Arquitectura", "DevOps", "Security"],
+      "email": "joel.gomez@ejemplo.com",
+      "telefono": "+51 985 107 359",
+      "ubicacion": "Tacna, PE",
+      "links": [
+        { "label": "GitHub", "url": "https://github.com/ioelgomez2019" },
+        { "label": "LinkedIn", "url": "https://www.linkedin.com/in/joel-santos-gomez-alanoca-6927b1184/" }
+      ],
+      "orden": 1
+    },
+    {
+      "nombre": "Julio Cesar Hallasi Ambrocio",
+      "rol": "QA / Analista",
+      "descripcion": "Diseña casos de prueba, criterios de aceptación y pruebas exploratorias. Automatiza suites básicas.",
+      "tags": ["QA", "Analítica", "Pruebas"],
+      "email": "julio.hallasi@ejemplo.com",
+      "telefono": "+51 900 000 005",
+      "ubicacion": "Puno, PE",
+      "links": [
+        { "label": "LinkedIn", "url": "https://www.linkedin.com/in/julio-hallasi" }
+      ],
+      "orden": 2
+    },
+    {
+      "nombre": "Percy Condori Yucra",
+      "rol": "Dev / Cybersecurity",
+      "descripcion": "Hardening, revisión OWASP y protección de endpoints. Monitoreo básico y buenas prácticas.",
+      "tags": ["DEV", "Cybersecurity", "OWASP"],
+      "email": "percy.condori@ejemplo.com",
+      "telefono": "+51 900 000 006",
+      "ubicacion": "Juliaca, PE",
+      "links": [
+        { "label": "GitHub", "url": "https://github.com/percy-condori" },
+        { "label": "Certificaciones", "url": "https://credly.com/users/percy" }
+      ],
+      "orden": 3
+    }
+  ]
+}

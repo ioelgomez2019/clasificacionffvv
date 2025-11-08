@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Notebook – CasoIIntegrador17.ipynb</title>
+
+  <!-- Bootstrap (opcional, para estilos de botones/maquetado) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Highlight.js (código) + tema adaptable -->
+  <link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+
+  <!-- notebookjs -->
+  <script src="https://cdn.jsdelivr.net/npm/notebookjs@0.5.3/dist/notebook.min.js" defer></script>
+
+  <!-- highlight.js core -->
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/common.min.js" defer></script>
+
+  <!-- MathJax (si hay fórmulas) -->
+  <script>
+    window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, svg: { fontCache: 'global' } };
+  </script>
+  <script id="mathjax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <style>
+    /* === Tema base claro/oscuro compatible con tu dashboard === */
+    :root{
+      --bg: #f7f8fa;
+      --panel: #ffffff;
+      --text: #0b1220;
+      --border: rgba(15,23,42,.12);
+      --muted: #5b6675;
+      --primary:#6366f1; --primary2:#22d3ee;
+    }
+    :root[data-theme="dark"]{
+      --bg:#0f172a; --panel:#0b1220; --text:#e5e7eb; --border:rgba(255,255,255,.12); --muted:#9aa4b2;
+    }
+    html, body { background: var(--bg); color: var(--text); }
+
+    .topbar {
+      position: sticky; top: 0; z-index: 10;
+      background: linear-gradient(90deg, color-mix(in oklab, var(--panel) 85%, transparent), color-mix(in oklab, var(--panel) 55%, transparent));
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(6px);
+    }
+    .container-page { max-width: 1100px; margin: 0 auto; padding: 1rem 1rem 3rem; }
+    .nb-card {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 1rem; padding: 1rem 1.25rem;
+    }
+    .muted { color: var(--muted); }
+
+    /* Notebook styles */
+    .ipynb-container .nb-cell {
+      border: 1px solid var(--border);
+      border-radius: .75rem;
+      padding: .75rem;
+      margin-bottom: 1rem;
+      background: color-mix(in oklab, var(--panel) 90%, transparent);
+    }
+    .ipynb-container .nb-output {
+      border-top: 1px dashed var(--border);
+      margin-top: .5rem;
+      padding-top: .5rem;
+    }
+
+    .btn-primary {
+      background-image: linear-gradient(90deg, var(--primary), var(--primary2)); border: none;
+    }
+    .btn-outline {
+      border: 1px solid var(--border); color: var(--text); background: transparent;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="container-page d-flex align-items-center justify-content-between gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <a class="btn btn-outline btn-sm" href="../index.html">
+          ← Volver al dashboard
+        </a>
+        <div>
+          <div class="fw-semibold">Notebook: <code>CasoIIntegrador17.ipynb</code></div>
+          <div class="muted small">Render 100% en el navegador (notebookjs + highlight.js + MathJax)</div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <!-- Theme toggle -->
+        <div class="form-check form-switch m-0">
+          <input class="form-check-input" type="checkbox" id="toggle-theme">
+          <label class="form-check-label small" for="toggle-theme">Tema</label>
+        </div>
+        <a class="btn btn-outline btn-sm" href="../data/CasoIIntegrador17.ipynb" download>Descargar .ipynb</a>
+        <label class="btn btn-outline btn-sm position-relative" title="Cargar .ipynb local">
+          Cargar .ipynb
+          <input id="file-ipynb" type="file" accept=".ipynb,application/json"
+                 class="position-absolute top-0 start-0 w-100 h-100 opacity-0" />
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENIDO -->
+  <div class="container-page">
+    <div class="nb-card">
+      <div id="ipynb-status" class="muted small mb-3">Intentando cargar <code>../data/CasoIIntegrador17.ipynb</code>…</div>
+      <div id="ipynb-container" class="ipynb-container"><!-- notebook render --></div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // ========= Tema (sincroniza con tu clave md:theme del dashboard) =========
+    const THEME_KEY = 'md:theme';
+    const $html = document.documentElement;
+    const $toggleTheme = document.getElementById('toggle-theme');
+    const $hljsTheme = document.getElementById('hljs-theme');
+
+    function applyTheme(theme){
+      $html.setAttribute('data-theme', theme);
+      localStorage.setItem(THEME_KEY, theme);
+      $toggleTheme.checked = (theme === 'dark');
+      // Cambiar estilo de highlight según tema
+      $hljsTheme.href = (theme === 'dark')
+        ? "https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css"
+        : "https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.min.css";
+    }
+    (function(){
+      const saved = localStorage.getItem(THEME_KEY);
+      if (saved) applyTheme(saved);
+      else {
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(prefersDark ? 'dark' : 'light');
+      }
+    })();
+    $toggleTheme.addEventListener('change', () => applyTheme($toggleTheme.checked ? 'dark' : 'light'));
+
+    // ========= Render de .ipynb =========
+    const NB_PATH_DEFAULT = "../data/CasoIIntegrador17.ipynb";
+    const $nbContainer = document.getElementById("ipynb-container");
+    const $nbStatus = document.getElementById("ipynb-status");
+    const $nbFile = document.getElementById("file-ipynb");
+
+    async function fetchJSON(url) {
+      const resp = await fetch(url, { cache: "no-store" });
+      if (!resp.ok) throw new Error("HTTP " + resp.status);
+      return resp.json();
+    }
+
+    function renderNotebookJSON(nbjson) {
+      if (!$nbContainer) return;
+      const nb = notebookjs.parse(nbjson);
+      const html = nb.render().el; // HTMLElement
+      $nbContainer.innerHTML = "";
+      $nbContainer.appendChild(html);
+
+      if (window.hljs) {
+        $nbContainer.querySelectorAll("pre code").forEach((el) => window.hljs.highlightElement(el));
+      }
+      if (window.MathJax?.typesetPromise) {
+        window.MathJax.typesetPromise([$nbContainer]).catch(() => {});
+      }
+    }
+
+    async function loadDefaultNotebook() {
+      try {
+        $nbStatus.textContent = "Cargando " + NB_PATH_DEFAULT + "…";
+        const nbjson = await fetchJSON(NB_PATH_DEFAULT);
+        renderNotebookJSON(nbjson);
+        $nbStatus.textContent = "Notebook cargado correctamente.";
+      } catch (err) {
+        $nbStatus.innerHTML = `
+          <span class="text-warning">No se pudo cargar <code>${NB_PATH_DEFAULT}</code> (${err.message}).</span>
+          Usa el botón <strong>Cargar .ipynb</strong> para subirlo manualmente.
+        `;
+      }
+    }
+
+    // Carga por defecto al abrir la página
+    document.addEventListener('DOMContentLoaded', loadDefaultNotebook);
+
+    // Carga mediante input file
+    $nbFile?.addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        $nbStatus.textContent = "Leyendo archivo local…";
+        const text = await file.text();
+        const json = JSON.parse(text);
+        renderNotebookJSON(json);
+        $nbStatus.textContent = "Notebook local cargado.";
+      } catch (err) {
+        $nbStatus.innerHTML = `<span class="text-danger">No se pudo leer el .ipynb: ${err.message}</span>`;
+      }
+    });
+  </script>
+</body>
+</html>

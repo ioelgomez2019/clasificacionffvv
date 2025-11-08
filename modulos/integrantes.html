@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Módulo · Integrantes</title>
+
+  <!-- Usa los mismos estilos del dashboard -->
+  <link rel="stylesheet" href="../css/style.css">
+
+  <style>
+    /* Ajustes internos del módulo: fondo transparente para integrarse al iframe */
+    html, body { background: transparent; }
+    .container-mod { max-width: 1100px; margin: 0 auto; padding: .5rem .5rem 2rem; }
+    .card-mod { background: var(--card); border: 1px solid var(--border); border-radius: 1rem; }
+    .integrante-avatar{
+      width: 56px; height: 56px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-weight: 700;
+      background: color-mix(in oklab, var(--primary) 25%, transparent);
+      color: var(--text);
+      border: 1px solid var(--border);
+      flex: 0 0 auto;
+    }
+    .badge-soft{
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--primary) 15%, transparent);
+      color: var(--text);
+      padding: .25rem .6rem;
+      font-size: .8rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sincroniza el tema con el dashboard (usa la misma clave) -->
+  <script>
+    (function syncTheme(){
+      const THEME_KEY = 'md:theme';
+      const saved = localStorage.getItem(THEME_KEY);
+      const html = document.documentElement;
+      if (saved === 'dark' || saved === 'light') {
+        html.setAttribute('data-theme', saved);
+      } else {
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        html.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+      }
+    })();
+  </script>
+
+  <div class="container-mod">
+    <div class="card-mod">
+      <div class="card-header" style="background:transparent; border-bottom:1px solid var(--border); padding:1rem 1.25rem;">
+        <h5 class="mb-0" style="color:var(--text);">Integrantes del Proyecto</h5>
+        <div class="text-muted small">Este módulo es independiente y se integra visualmente con el dashboard.</div>
+      </div>
+
+      <div class="card-body" style="padding:1rem 1.25rem;">
+        <p class="text-muted">
+          Aquí puedes listar a los miembros del equipo. Duplica una tarjeta para agregar más integrantes.
+        </p>
+
+        <div class="row g-3 g-lg-4">
+
+          <!-- TARJETA 1 -->
+          <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card h-100" style="background:var(--card); border:1px solid var(--border);">
+              <div class="card-body d-flex gap-3">
+                <div class="integrante-avatar">KV</div>
+                <div class="flex-grow-1">
+                  <div class="d-flex align-items-start justify-content-between">
+                    <h6 class="mb-1" style="color:var(--text);">Kahos Vicent</h6>
+                    <span class="badge-soft">Líder</span>
+                  </div>
+                  <div class="text-muted small">Data Science • Segmentación</div>
+                  <div class="small mt-2">
+                    <span class="material-icons-round align-middle me-1" style="font-size:1rem;">mail</span>
+                    <a href="mailto:correo@ejemplo.com">correo@ejemplo.com</a>
+                  </div>
+                  <div class="small">
+                    <span class="material-icons-round align-middle me-1" style="font-size:1rem;">call</span>
+                    +51 900 000 000
+                  </div>
+                </div>
+              </div>
+              <div class="card-footer" style="border-top:1px solid var(--border); background:transparent;">
+                <span class="badge-soft me-1">K-Means</span>
+                <span class="badge-soft me-1">ETL</span>
+                <span class="badge-soft">Dashboard</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- TARJETA 2 -->
+          <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card h-100" style="background:var(--card); border:1px solid var(--border);">
+              <div class="card-body d-flex gap-3">
+                <div class="integrante-avatar">AA</div>
+                <div class="flex-grow-1">
+                  <div class="d-flex align-items-start justify-content-between">
+                    <h6 class="mb-1" style="color:var(--text);">Ariana Alvarez</h6>
+                    <span class="badge-soft">Modelamiento</span>
+                  </div>
+                  <div class="text-muted small">Preprocesamiento • Métricas</div>
+                  <div class="small mt-2">
+                    <span class="material-icons-round align-middle me-1" style="font-size:1rem;">mail</span>
+                    <a href="mailto:ariana@ejemplo.com">ariana@ejemplo.com</a>
+                  </div>
+                  <div class="small">
+                    <span class="material-icons-round align-middle me-1" style="font-size:1rem;">public</span>
+                    <a href="#" target="_blank" rel="noopener">Portafolio</a>
+                  </div>
+                </div>
+              </div>
+              <div class="card-footer" style="border-top:1px solid var(--border); background:transparent;">
+                <span class="badge-soft me-1">EDA</span>
+                <span class="badge-soft me-1">Validación</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- TARJETA 3 -->
+          <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card h-100" style="background:var(--card); border:1px solid var(--border);">
+              <div class="card-body d-flex gap-3">
+                <div class="integrante-avatar">JP</div>
+                <div class="flex-grow-1">
+                  <div class="d-flex align-items-start justify-content-between">
+                    <h6 class="mb-1" style="color:var(--text);">Juan Perez</h6>
+                    <span class="badge-soft">Frontend</span>
+                  </div>
+                  <div class="text-muted small">UI/UX • Integración</div>
+                  <div class="small mt-2">
+                    <span class="material-icons-round align-middle me-1" style="font-size:1rem;">mail</span>
+                    <a href="mailto:juan@ejemplo.com">juan@ejemplo.com</a>
+                  </div>
+                  <div class="small">
+                    <span class="material-icons-round align-middle me-1" style="font-size:1rem;">link</span>
+                    <a href="#" target="_blank" rel="noopener">GitHub</a>
+                  </div>
+                </div>
+              </div>
+              <div class="card-footer" style="border-top:1px solid var(--border); background:transparent;">
+                <span class="badge-soft me-1">Bootstrap</span>
+                <span class="badge-soft">Chart.js</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Duplica un bloque .col para agregar más integrantes -->
+
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

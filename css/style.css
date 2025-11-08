@@ -1,0 +1,11 @@
+/* css/style.css */
+body { background: #f7f7fb; }
+
+.card { border: 0; }
+.card-header { background: #fff; }
+
+.form-text { margin-top: .25rem; }
+
+footer { border-top: 1px solid rgba(0,0,0,.05); background: #fff; }
+
+.placeholder { min-height: 1rem; }

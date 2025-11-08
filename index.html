@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clasificador por Centroide + Dashboard</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+
+  <style>
+    :root {
+      --bg-soft: #0f172a; /* slate-900 */
+      --card-soft: #111827; /* gray-900 */
+      --muted: #94a3b8; /* slate-400 */
+    }
+    body {
+      background: radial-gradient(1200px 800px at 10% -10%, rgba(59,130,246,.15), transparent 60%),
+                  radial-gradient(1200px 800px at 110% 10%, rgba(236,72,153,.15), transparent 60%),
+                  var(--bg-soft);
+      min-height: 100vh;
+      color: #e5e7eb;
+    }
+    .glass {
+      background: rgba(17,24,39,0.72);
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
+      backdrop-filter: blur(8px);
+      border-radius: 1rem;
+    }
+    .brand-badge {
+      border: 1px solid rgba(255,255,255,.15);
+      color: #a5b4fc; /* indigo-300 */
+    }
+    .text-muted { color: var(--muted) !important; }
+    .form-floating>.form-control, .form-floating>.form-select { background-color: #0b1220; color: #e5e7eb; }
+    .form-control::placeholder { color: #64748b; }
+    .form-text { color: #94a3b8; }
+    .btn-primary { background-image: linear-gradient(90deg, #6366f1, #22d3ee); border: none; }
+    .btn-outline-light { border-color: rgba(255,255,255,.25) }
+    .table-dark tbody tr td { color: #e5e7eb; }
+    .kbd {
+      border: 1px solid rgba(255,255,255,.2); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      padding: .15rem .4rem; border-radius: .4rem; background: rgba(255,255,255,.05);
+    }
+    .spinner { width: 1.25rem; height: 1.25rem; border: 3px solid rgba(255,255,255,.25); border-top-color: #22d3ee; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg bg-transparent py-3">
+    <div class="container">
+      <span class="navbar-brand mb-0 h1 d-flex align-items-center gap-2 text-light">
+        <span class="badge rounded-pill brand-badge">ML</span>
+        Clasificador por Centroide
+      </span>
+      <div class="d-flex align-items-center gap-2">
+        <button id="btn-limpiar" class="btn btn-outline-light btn-sm" title="Limpiar formulario (Esc)"><span class="kbd">Esc</span> Limpiar</button>
+        <label class="btn btn-outline-light btn-sm position-relative" title="Cargar JSON de reglas (alternativa al fetch)">
+          Cargar JSON
+          <input id="file-json" type="file" accept="application/json" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" />
+        </label>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container pb-5">
+    <!-- HEADER -->
+    <div class="glass p-4 p-md-5 mb-4">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div>
+          <h1 class="display-6 mb-1">Asistente de Clasificación por <span class="text-info">Centroide Más Cercano</span></h1>
+          <p class="mb-0 text-muted">Transforma entradas (numéricas, ordinales y nominales) y asigna el cluster por distancia euclidiana.</p>
+        </div>
+        <div class="text-end">
+          <div id="version" class="badge text-bg-dark border border-light-subtle">v–</div>
+          <div class="small text-muted">Fuente: <code>data/reglas_asociacion.json</code></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <section class="row g-3 mb-4">
+      <div class="col-12 col-md-3">
+        <div class="glass p-3 h-100">
+          <div class="text-muted small">Total de Features</div>
+          <div id="dash-features" class="display-6">–</div>
+        </div>
+      </div>
+      <div class="col-12 col-md-3">
+        <div class="glass p-3 h-100">
+          <div class="text-muted small">Dimensión del Espacio</div>
+          <div id="dash-dim" class="display-6">–</div>
+        </div>
+      </div>
+      <div class="col-12 col-md-3">
+        <div class="glass p-3 h-100">
+          <div class="text-muted small">Centroides</div>
+          <div id="dash-centroids" class="display-6">–</div>
+        </div>
+      </div>
+      <div class="col-12 col-md-3">
+        <div class="glass p-3 h-100">
+          <div class="text-muted small">Último Cluster</div>
+          <div id="dash-last" class="display-6">–</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FORM + RESULTADOS -->
+    <section class="row g-4">
+      <div class="col-12 col-lg-6">
+        <div class="glass p-4 h-100">
+          <form id="form-clasificador" novalidate>
+            <div id="dynamic-fields" class="row g-3"></div>
+
+            <hr class="border-secondary-subtle my-4" />
+            <div class="d-flex gap-2 align-items-center">
+              <button type="submit" class="btn btn-primary px-4" id="btn-clasificar">
+                <span class="me-2 d-inline-flex align-items-center justify-content-center"><span class="spinner d-none" id="spin-submit"></span></span>
+                Clasificar
+              </button>
+              <button type="button" class="btn btn-outline-light" id="btn-demo">Usar demo</button>
+              <span class="text-muted small">Validación HTML5 activa</span>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <div class="glass p-4 h-100">
+          <div id="resultado"><p class="text-muted mb-0">Aún no hay resultado. Completa el formulario y presiona <strong>Clasificar</strong>.</p></div>
+          <div id="explicacion" class="mt-3 text-muted small"></div>
+          <hr class="border-secondary-subtle" />
+          <div class="mb-2 d-flex align-items-center justify-content-between">
+            <h6 class="mb-0">Ranking de distancias</h6>
+            <span class="text-muted small">(euclidiana)</span>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-dark table-striped table-hover align-middle mb-3">
+              <thead><tr><th>Cluster</th><th>Distancia</th></tr></thead>
+              <tbody id="tabla-ranking"><tr><td colspan="2" class="text-muted">—</td></tr></tbody>
+            </table>
+          </div>
+          <canvas id="chart-dists" height="120"></canvas>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+  // =================== CONFIG ===================
+  const RULES_URL = "data/reglas_asociacion.json"; // ruta por defecto
+
+  // =================== ESTADO ===================
+  let RULES = null;          // reglas cargadas
+  let EXPANSION_SPEC = null; // especificación de expansión
+  let chart = null;          // instancia Chart.js
+
+  // =================== DOM ===================
+  const $fields = document.getElementById("dynamic-fields");
+  const $form   = document.getElementById("form-clasificador");
+  const $res    = document.getElementById("resultado");
+  const $exp    = document.getElementById("explicacion");
+  const $ver    = document.getElementById("version");
+  const $btnLimpiar = document.getElementById("btn-limpiar");
+  const $fileJson = document.getElementById("file-json");
+  const $btnDemo = document.getElementById("btn-demo");
+  const $spinSubmit = document.getElementById("spin-submit");
+  const $dash = {
+    features: document.getElementById("dash-features"),
+    dim: document.getElementById("dash-dim"),
+    centroids: document.getElementById("dash-centroids"),
+    last: document.getElementById("dash-last")
+  };
+
+  // =================== UTILIDADES ===================
+  const el = (tag, attrs = {}, inner = "") => {
+    const n = document.createElement(tag);
+    Object.entries(attrs).forEach(([k, v]) => {
+      if (k === "class") n.className = v;
+      else if (k === "for") n.htmlFor = v;
+      else if (v === true) n.setAttribute(k, "");
+      else if (v === false || v == null) {/*ignore*/}
+      else n.setAttribute(k, v);
+    });
+    if (inner) n.innerHTML = inner;
+    return n;
+  };
+
+  const euclidean = (a, b) => {
+    let sum = 0;
+    for (let i = 0; i < a.length; i++) {
+      const d = (a[i] ?? 0) - (b[i] ?? 0);
+      sum += d * d;
+    }
+    return Math.sqrt(sum);
+  };
+
+  const withSpinner = async (fn) => {
+    $spinSubmit.classList.remove("d-none");
+    try { return await fn(); } finally { $spinSubmit.classList.add("d-none"); }
+  };
+
+  // =================== RENDER ===================
+  function renderFields(features) {
+    $fields.innerHTML = "";
+    features.forEach((f, idx) => {
+      const col = el("div", { class: "col-md-6" });
+      const id = `fld_${idx}`;
+      const group = el("div", { class: "form-floating" });
+
+      if (f.type === "num") {
+        const input = el("input", {
+          type: "number", id, name: f.name, class: "form-control",
+          min: f.min, max: f.max, step: "any", required: true, placeholder: f.label
+        });
+        if (typeof f.default === 'number') input.value = f.default;
+        const label = el("label", { for: id }, f.label);
+        group.appendChild(input); group.appendChild(label);
+        const help = el("div", { class: "form-text" }, `Límites: ${f.min} – ${f.max}`);
+        col.appendChild(group); col.appendChild(help);
+      }
+
+      if (f.type === "ord" || f.type === "nom") {
+        const opts = f.type === "ord" ? f.order : f.values;
+        const select = el("select", { id, name: f.name, class: "form-select", required: true });
+        select.appendChild(el("option", { value: "" }, "Selecciona..."));
+        opts.forEach(v => { const o = el("option", { value: v }, v); if (f.default === v) o.selected = true; select.appendChild(o); });
+        const label = el("label", { for: id }, f.label);
+        group.appendChild(select); group.appendChild(label);
+        const help = el("div", { class: "form-text" }, `Opciones: ${opts.join(" · ")}`);
+        col.appendChild(group); col.appendChild(help);
+      }
+
+      $fields.appendChild(col);
+    });
+  }
+
+  function buildExpansionSpec(features) {
+    const spec = []; let cursor = 0;
+    features.forEach(f => {
+      if (f.type === "num") {
+        spec.push({ name: f.name, type: "num", startIndex: cursor, length: 1, meta: { mean: f.mean, std: f.std } });
+        cursor += 1;
+      } else if (f.type === "ord") {
+        spec.push({ name: f.name, type: "ord", startIndex: cursor, length: 1, meta: { order: f.order } });
+        cursor += 1;
+      } else if (f.type === "nom") {
+        spec.push({ name: f.name, type: "nom", startIndex: cursor, length: f.values.length, meta: { values: f.values } });
+        cursor += f.values.length;
+      }
+    });
+    return { spec, vectorLength: cursor };
+  }
+
+  function encodeFormToVector(features, spec) {
+    const { vectorLength } = spec; const v = new Array(vectorLength).fill(0);
+    features.forEach(f => {
+      const s = spec.spec.find(x => x.name === f.name); if (!s) return;
+      const elInput = document.querySelector(`[name="${f.name}"]`);
+      const raw = elInput?.value;
+
+      if (f.type === "num") {
+        if (raw === "" || raw == null) throw new Error(`Campo requerido: ${f.label ?? f.name}`);
+        const x = Number(raw); const mu = Number(s.meta.mean ?? 0); const sd = Number(s.meta.std ?? 1);
+        v[s.startIndex] = sd ? (x - mu) / sd : x;
+      }
+      if (f.type === "ord") {
+        const order = s.meta.order || []; if (raw === "") throw new Error(`Selecciona un valor en ${f.label ?? f.name}`);
+        const idx = order.indexOf(raw); if (idx === -1) throw new Error(`Valor no permitido en ${f.label ?? f.name}`);
+        v[s.startIndex] = idx;
+      }
+      if (f.type === "nom") {
+        const values = s.meta.values || []; if (raw === "") throw new Error(`Selecciona un valor en ${f.label ?? f.name}`);
+        const pos = values.indexOf(raw); if (pos === -1) throw new Error(`Valor no permitido en ${f.label ?? f.name}`);
+        for (let i = 0; i < values.length; i++) v[s.startIndex + i] = (i === pos) ? 1 : 0;
+      }
+    });
+    return v;
+  }
+
+  function predictCluster(vec, centroids) {
+    const dists = centroids.map(c => ({ cluster: c.cluster, dist: euclidean(vec, c.vector) }));
+    dists.sort((a, b) => a.dist - b.dist);
+    return { best: dists[0], ranking: dists };
+  }
+
+  function renderResultado(pred, vec) {
+    const { best, ranking } = pred;
+
+    // Resumen
+    $res.innerHTML = `
+      <div class="display-6 mb-2">Cluster <span class="badge text-bg-info">${best.cluster}</span></div>
+      <div class="text-muted">Distancia al centroide: <strong>${best.dist.toFixed(4)}</strong></div>
+      <div class="mt-2 small text-muted">Vector (z/índice/one-hot): <code>${vec.map(x => Number(x).toFixed(3)).join(", ")}</code></div>
+    `;
+
+    // Explicación
+    $exp.innerHTML = `La asignación se realiza por <em>centroide más cercano</em> en el espacio transformado: <code>num → z-score</code>, <code>ordinal → índice</code>, <code>nominal → one-hot</code>. Verifica que <code>mean</code>/<code>std</code> y el orden de categorías del JSON coincidan con el entrenamiento.`;
+
+    // Tabla ranking
+    const $tbody = document.getElementById("tabla-ranking");
+    $tbody.innerHTML = ranking.map(r => `<tr><td>Cluster ${r.cluster}</td><td>${r.dist.toFixed(4)}</td></tr>`).join("");
+
+    // Dashboard last
+    $dash.last.textContent = `#${best.cluster}`;
+
+    // Chart
+    renderChart(ranking);
+  }
+
+  function renderChart(ranking) {
+    const ctx = document.getElementById('chart-dists').getContext('2d');
+    const labels = ranking.map(r => `C${r.cluster}`);
+    const data = ranking.map(r => r.dist);
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets: [{ label: 'Distancia al centroide', data }] },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: true },
+          tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw.toFixed(4)}` } }
+        },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,.06)' } },
+          y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.06)' } }
+        }
+      }
+    });
+  }
+
+  function clearForm() {
+    $form.reset();
+    localStorage.removeItem('clasif:lastValues');
+    $res.innerHTML = `<p class="text-muted mb-0">Aún no hay resultado. Completa el formulario y presiona <strong>Clasificar</strong>.</p>`;
+    $exp.innerHTML = "";
+    document.getElementById("tabla-ranking").innerHTML = `<tr><td colspan="2" class="text-muted">—</td></tr>`;
+    if (chart) { chart.destroy(); chart = null; }
+    $dash.last.textContent = "–";
+  }
+
+  function updateDashboardMeta() {
+    if (!RULES || !EXPANSION_SPEC) return;
+    $ver.textContent = `v${RULES.version ?? "–"}`;
+    $dash.features.textContent = RULES.feature_space?.length ?? 0;
+    $dash.dim.textContent = EXPANSION_SPEC.vectorLength ?? 0;
+    $dash.centroids.textContent = RULES.centroids?.length ?? 0;
+  }
+
+  // =================== INIT ===================
+  async function loadRulesFromUrl(url) {
+    const resp = await fetch(url, { cache: 'no-store' });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    return resp.json();
+  }
+
+  async function init(rules) {
+    RULES = rules;
+    renderFields(RULES.feature_space);
+    EXPANSION_SPEC = buildExpansionSpec(RULES.feature_space);
+    updateDashboardMeta();
+
+    // Restaurar últimos valores (si existen)
+    try {
+      const last = JSON.parse(localStorage.getItem('clasif:lastValues') || 'null');
+      if (last) Object.entries(last).forEach(([name, val]) => { const el = document.querySelector(`[name="${name}"]`); if (el) el.value = val; });
+    } catch {}
+  }
+
+  // =================== EVENTOS ===================
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') clearForm(); });
+
+  $form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!$form.checkValidity()) { $form.classList.add('was-validated'); return; }
+
+    await withSpinner(async () => {
+      try {
+        const vec = encodeFormToVector(RULES.feature_space, EXPANSION_SPEC);
+        // validar dimensionalidad de centroides
+        RULES.centroids.forEach(c => {
+          if (c.vector.length !== EXPANSION_SPEC.vectorLength) {
+            throw new Error(`Dimensión del centroide ${c.cluster} (${c.vector.length}) no coincide con el espacio (${EXPANSION_SPEC.vectorLength}).`);
+          }
+        });
+        const pred = predictCluster(vec, RULES.centroids);
+        renderResultado(pred, vec);
+
+        // persistir valores del form
+        const values = {};
+        RULES.feature_space.forEach(f => { const el = document.querySelector(`[name="${f.name}"]`); values[f.name] = el?.value ?? null; });
+        localStorage.setItem('clasif:lastValues', JSON.stringify(values));
+      } catch (err) {
+        $res.innerHTML = `<div class="alert alert-danger">⚠️ ${err.message}</div>`;
+        $exp.innerHTML = "";
+      }
+    });
+  });
+
+  $btnLimpiar.addEventListener('click', clearForm);
+
+  $fileJson.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0]; if (!file) return;
+    try {
+      const text = await file.text();
+      const json = JSON.parse(text);
+      await init(json);
+      $ver.textContent = `${$ver.textContent} (local)`;
+    } catch (err) {
+      alert('No se pudo leer el JSON: ' + err.message);
+    }
+  });
+
+  $btnDemo.addEventListener('click', () => {
+    if (!RULES) return;
+    // Autocompletar con valores válidos simples
+    RULES.feature_space.forEach(f => {
+      const el = document.querySelector(`[name="${f.name}"]`);
+      if (!el) return;
+      if (f.type === 'num') {
+        const mid = (Number(f.min ?? 0) + Number(f.max ?? 0)) / 2;
+        el.value = (f.default ?? mid).toString();
+      }
+      if (f.type === 'ord') el.value = f.default ?? f.order?.[0] ?? '';
+      if (f.type === 'nom') el.value = f.default ?? f.values?.[0] ?? '';
+    });
+  });
+
+  // Cargar reglas por defecto al iniciar
+  (async () => {
+    try {
+      const rules = await loadRulesFromUrl(RULES_URL);
+      await init(rules);
+    } catch (err) {
+      $res.innerHTML = `<div class="alert alert-warning d-flex align-items-center gap-2">
+        <div class="spinner"></div>
+        <div>
+          No se pudieron cargar las reglas (<code>${RULES_URL}</code>): ${err.message}.<br/>
+          Si estás abriendo este archivo con <em>file://</em>, algunos navegadores bloquean <code>fetch</code>. Usa un servidor local o <strong>sube el JSON con el botón "Cargar JSON"</strong>.
+        </div>
+      </div>`;
+    }
+  })();
+  </script>
+</body>
+</html>

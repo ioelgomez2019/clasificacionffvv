@@ -294,3 +294,88 @@ $btnDemo?.addEventListener("click", () => {
     </div>`;
   }
 })();
+
+
+// Mapeo de explicación por cluster (no toca tu lógica actual)
+const CLUSTER_EXPLAIN = {
+  0: {
+    etiqueta: "Cliente C",
+    color: "warning",
+    titulo: "Cluster #0 — Clientes Potenciales C",
+    resumen: "Segmento de menor potencial: ingresos y gasto bajos, perfil conservador.",
+    bullets: [
+      "Ingreso y monto de dinero por debajo del promedio.",
+      "Mayor proporción de casados, menor casa propia.",
+      "Historial relativamente estable, bajo riesgo pero menor valor.",
+    ],
+    nota: "Estrategia: ofertas básicas, educación financiera, cross-sell gradual.",
+  },
+  1: {
+    etiqueta: "Cliente B",
+    color: "info",
+    titulo: "Cluster #1 — Clientes Potenciales B",
+    resumen: "Segmento medio: jóvenes/activos, propietarios, gasto moderado-alto.",
+    bullets: [
+      "Ingreso medio/alto y consumo moderado-alto.",
+      "Más propietarios y mayor propensión a comprar catálogos.",
+      "Historial medio: requiere seguimiento y fidelización.",
+    ],
+    nota: "Estrategia: bundles, programas de puntos, upgrade de productos.",
+  },
+  2: {
+    etiqueta: "Cliente A",
+    color: "success",
+    titulo: "Cluster #2 — Clientes Potenciales A",
+    resumen: "Alto valor: ingresos y gasto elevados, mayoría propietarios.",
+    bullets: [
+      "Ingreso ≫ promedio y alto monto de dinero.",
+      "Perfil joven con fuerte capacidad de compra.",
+      "Historial más exigente: cuidar experiencia y límites.",
+    ],
+    nota: "Estrategia: premium/upsell, atención prioritaria, beneficios exclusivos.",
+  },
+  3: {
+    etiqueta: "Cliente AA",
+    color: "primary",
+    titulo: "Cluster #3 — Clientes Potenciales AA",
+    resumen: "Top del portafolio: muy alto potencial y fidelidad.",
+    bullets: [
+      "Comportamiento estable y valor sostenido.",
+      "Excelente respuesta a campañas de valor agregado.",
+      "Alta probabilidad de recompra.",
+    ],
+    nota: "Estrategia: VIP, early-access, pricing relacional, retención proactiva.",
+  },
+};
+
+// Función que pinta la explicación en el card nuevo
+function renderExplicacionCluster(clusterId) {
+  const box = document.getElementById("explicacion-cliente");
+  if (!box) return;
+
+  const cfg = CLUSTER_EXPLAIN[clusterId];
+  if (!cfg) {
+    box.innerHTML = `
+      <p class="text-muted mb-0">No hay explicación disponible para este cluster.</p>
+    `;
+    return;
+  }
+
+  box.innerHTML = `
+    <div class="d-flex align-items-center gap-2 mb-2">
+      <span class="badge bg-${cfg.color}" style="font-size:0.9rem;">${cfg.etiqueta}</span>
+      <span class="text-muted small">clasificación comercial</span>
+    </div>
+
+    <h5 class="mb-1">${cfg.titulo}</h5>
+    <p class="mb-3">${cfg.resumen}</p>
+
+    <ul class="mb-3">
+      ${cfg.bullets.map(b => `<li>${b}</li>`).join("")}
+    </ul>
+
+    <div class="alert alert-${cfg.color} mb-0" role="alert">
+      <i class="bi bi-stars me-1"></i> <strong>Recomendación:</strong> ${cfg.nota}
+    </div>
+  `;
+}

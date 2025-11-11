@@ -106,9 +106,15 @@
       </div>
     </nav>
 
+    <!-- Toggle sidebar (visible solo en móvil) -->
+    <button id="btn-sidebar-toggle" class="btn btn-outline-light d-lg-none mb-2" aria-controls="sidebar" aria-expanded="false">
+      <span class="material-icons-round align-middle">menu</span>
+    </button>
+
     <!-- Layout -->
     <div class="container-fluid">
       <div class="row">
+        <!-- Sidebar -->
         <!-- Sidebar -->
         <aside id="sidebar" class="col-12 col-lg-3 col-xxl-2 sidebar p-3 p-lg-4">
           <div class="mb-3 text-uppercase small text-muted">Navegación</div>
@@ -153,7 +159,7 @@
             <label class="btn btn-outline-light position-relative">
               <span class="material-icons-round align-middle me-1">upload_file</span> Cargar JSON
               <input id="file-json" type="file" accept="application/json"
-                     class="position-absolute top-0 start-0 w-100 h-100 opacity-0" />
+                    class="position-absolute top-0 start-0 w-100 h-100 opacity-0" />
             </label>
           </div>
           <div class="small text-muted mt-2">

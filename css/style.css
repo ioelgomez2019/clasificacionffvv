@@ -164,3 +164,85 @@ html, body { color: var(--text); }
 /* Cinta rayada */
 #tab-informe .stripe rect{ animation: slide 2.2s linear infinite; }
 @keyframes slide{ to { transform: translateX(-60px); } }
+.dev-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #1e1e2f;
+  color: #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-family: 'Fira Code', monospace;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+/* taza */
+.coffee {
+  position: relative;
+  width: 25px;
+  height: 25px;
+}
+.cup {
+  width: 25px;
+  height: 15px;
+  background: #fff;
+  border-radius: 0 0 10px 10px;
+  position: absolute;
+  bottom: 0;
+}
+.cup::after {
+  content: "";
+  position: absolute;
+  right: -6px;
+  top: 3px;
+  width: 10px;
+  height: 10px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+}
+.steam {
+  position: absolute;
+  top: -8px;
+  left: 9px;
+  width: 5px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(to top, #aaa, transparent);
+  animation: steamUp 1.2s ease-in-out infinite;
+}
+@keyframes steamUp {
+  0% { transform: translateY(0); opacity: 0.8; }
+  100% { transform: translateY(-10px); opacity: 0; }
+}
+
+/* texto */
+.dev-tag {
+  color: #00e5ff;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+.btn-colab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #f9ab00, #f4b400, #fbbc05);
+  color: #222;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 50px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.btn-colab .icon {
+  width: 22px;
+  height: 22px;
+}
+
+.btn-colab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+  background: linear-gradient(135deg, #f4b400, #f9ab00, #ffd54f);
+}

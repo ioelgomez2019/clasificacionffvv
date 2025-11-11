@@ -144,18 +144,54 @@ function predictCluster(vec, centroids) {
 
 function renderResultado(pred, vec) {
   const { best, ranking } = pred;
+console.log(best.cluster);
 
-  $res.innerHTML = `
-    <div class="display-6 mb-2">Cluster <span class="badge text-bg-info">#${best.cluster}</span></div>
-    <div class="text-muted">Distancia al centroide: <strong>${best.dist.toFixed(4)}</strong></div>
-    <div class="mt-2 small text-muted">Vector (z/índice/one-hot): <code>${vec.map(x => Number(x).toFixed(3)).join(", ")}</code></div>
-  `;
+// Define el texto del cliente según el clúster
+let clienteTexto = "";
+switch (Number(best.cluster)) {
+  case 0:
+    clienteTexto = "Cliente C — Alto riesgo, historial irregular.";
+    break;
+  case 1:
+    clienteTexto = "Cliente B — Riesgo medio, comportamiento variable";
+    break;
+  case 2:
+    clienteTexto = "Cliente A — Buen Vendedor y confiable.";
+    break;
+  case 3:
+    clienteTexto = "Cliente AA — Mejor cliente, premium y vendedor.";
+    break;
+  case 4:
+    clienteTexto = "Cliente AAA — .";
+    break;
+  default:
+    clienteTexto = "Sin clasificación definida.";
+}
+
+// Si tienes un dashboard (opcional)
+if ($dash?.last) $dash.last.textContent = clienteTexto;
+
+// Mostrar en el panel de resultados
+$res.innerHTML = `
+  <div class="display-6 mb-2">
+    Cluster <span class="badge text-bg-info">#${best.cluster}</span>
+  </div>
+  <div class="text-muted">Distancia al centroide:
+    <strong>${best.dist.toFixed(4)}</strong>
+  </div>
+  <div class="mt-2 small text-muted">
+    Vector (z/índice/one-hot):
+    <code>${vec.map(x => Number(x).toFixed(3)).join(", ")}</code>
+  </div>
+  <div id="explicacion-cliente" class="mt-4 alert alert-primary">
+    <strong>Clasificación del cliente:</strong> ${clienteTexto}
+  </div>
+`;
   $exp.innerHTML = `Asignación por <em>centroide más cercano</em> en el espacio transformado: <code>num → z-score</code>, <code>ord → índice</code>, <code>nom → one-hot</code>. Verifica <code>mean/std</code> y el orden del JSON.`;
 
   const $tbody = document.getElementById("tabla-ranking");
-  if ($tbody) $tbody.innerHTML = ranking.map(r => `<tr><td>Cluster ${r.cluster}</td><td>${r.dist.toFixed(4)}</td></tr>`).join("");
+  if ($tbody) $tbody.innerHTML = ranking.map(r => `<tr><td>ClusterClusterCluster ${r.cluster}</td><td>${r.dist.toFixed(4)}</td></tr>`).join("");
 
-  if ($dash.last) $dash.last.textContent = `#${best.cluster}`;
 
   renderChart(ranking);
 }

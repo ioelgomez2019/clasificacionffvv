@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Material Dashboard · Clasificador por Centroide</title>
+  <title>Clasificador por Centroide</title>
 
 <!-- highlight.js -->
 <link id="hljs-theme" rel="stylesheet"
@@ -45,12 +45,14 @@
 <body class="bg-app">
 
   <!-- ========== LOGIN (sin BD) ========== -->
+   
   <section id="screen-login" class="vh-100 d-flex align-items-center justify-content-center">
+    
     <div class="card shadow-lg card-login">
       <div class="card-body p-4 p-md-5">
         <div class="text-center mb-3">
-          <span class="badge rounded-pill brand-badge">MD</span>
-          <h1 class="h4 mt-2 mb-0">Material Dashboard</h1>
+          <JOEL class="badge rounded-pill brand-badge"> '<'/JOEL>"</span>
+          <h1 class="h4 mt-2 mb-0"></h1>
           <p class="text-muted mb-0">Inicia sesión para continuar</p>
         </div>
         <form id="form-login" novalidate>
@@ -73,8 +75,10 @@
           </button>
           <div class="form-text text-center">Hint: usuario <code>admin</code> / contraseña <code>admin</code></div>
         </form>
+        
       </div>
     </div>
+    
   </section>
 
   <!-- ========== APP (DASHBOARD + CLASIFICADOR + PROBLEMATICA + INFORME) ========== -->
@@ -321,6 +325,13 @@
                 </div>
               </div><!-- row -->
             </div>
+          <div id="resultado">
+            <p class="text-muted mb-0">Aún no hay resultado. Completa el formulario y presiona <strong>Clasificar</strong>.</p>
+          </div>
+
+
+<hr>
+<div id="explicacion" class="small text-muted"></div>
 
             <!-- PROBLEMÁTICA (HTML + PDF con tabs) -->
             <div class="tab-pane fade" id="tab-problematica">
@@ -388,6 +399,12 @@
                   <h5 class="mb-0">
                     <span class="material-icons-round align-middle me-1">article</span>
                     Notebook: CasoIIntegrador17.ipynb
+                    <a href="https://colab.research.google.com/drive/1JiK8O8sHdh4Cj12k3YCqAQzdpxgB8sjp?usp=sharing"
+                      target="_blank" rel="noopener" class="btn-colab">
+                      <img src="https://colab.research.google.com/img/colab_favicon_256px.png" alt="Colab" class="icon">
+                      Ver en Colab
+                    </a>
+
                   </h5>
                   <div class="d-flex gap-2">
                     <label class="btn btn-outline-light btn-sm position-relative" title="Cargar .ipynb local">
